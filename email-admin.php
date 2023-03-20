@@ -103,14 +103,3 @@ function send_emaildata()
     wp_mail($to, $subject, $message, $headers);
 }
 
-
-// function send_email_to_admin() {
-//     $to = 'atul.kumar@wisdmlabs.com';
-//     $subject = 'Daily Update';
-//     $message = 'This is your daily update from WordPress.';
-//     $headers = array( 
-//         'From: atul.kumar@wisdmlabs.com',
-//         'Content-Type: text/html; charset=UTF-8' );
-
-//     wp_mail( $to, $subject, $message, $headers );
-// }
