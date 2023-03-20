@@ -8,7 +8,7 @@
 * Text Domain: maildesk
 */
 
-add_action( 'publish_post', 'send_email_to_admin' );
+add_action( 'wp', 'send_emaildata' );
 
 //if this file called directly, abort
 if( !defined( 'WPINC' ) )
@@ -26,38 +26,27 @@ if( !defined( 'WP_PLUGIN_DIR' ) )
     define( 'WP_PLUGIN_DIR', plugin_dir_url(__FILE__) );
 }
 
-
-//setting the menu page for the trial
-function wp_email_menu()
-{
-    add_menu_page(
-        'WP email',
-        'email',
-         'manage_options',
-          'email-admin',
-           'get_emaildata',
-            'dashicons-calendar',
-             7 );
-    
-
-}
-add_action('admin_menu', 'wp_email_menu');
-//ending the setting
-
-
 //email to send in evry minute or so 
-// if(!function_exists('adding_cron_schedule'))
-// {
-//     function adding_cron_schedule($schedules = array())
-//     {
-//         $schedules['every_minute'] = array(
-//             'iterval' => 120,
-//             'display' => __('Every Minute', 'maildesk'),
-//         );
-//         return $schedules;
-//     }
-// }
-// add_filter('cron_schedules', 'adding_cron_schedule');
+if(!function_exists('adding_cron_schedule')):
+    function adding_cron_schedule($schedules = array())
+    {
+        $schedules['every_minute'] = array(
+            'iterval' => 120,
+            'display' => __('Every Minute', 'maildesk'),
+        );
+        return $schedules;
+    }
+add_filter('cron_schedules', 'adding_cron_schedule');
+endif;
+
+function schedule_email()
+{
+    if( !wp_next_scheduled( 'schedule_email' ) )
+    {
+        wp_schedule_event(time(), 'daily', 'schedule_email');
+    }
+}
+add_action('schedule_email', 'send_emaildata');
 
 
 function get_emaildata()
@@ -86,24 +75,14 @@ function get_emaildata()
         );
         array_push($data, $post_data);
     }
-    //return $data; 
-
-    print("<pre>".print_r( $data, true ). "</pre>");
-    var_dump($data);
+    return $data;
 }
-
-// function emails_data()
-// {
-//     echo 'inside this function';
-//     get_emaildata();
-// }
-
 
 function send_emaildata()
 {
     $to = get_option('admin_email');
     $subject = 'Daily posts';
-    $data = get_daily_post_summary();
+    $data = get_emaildata();
     $message = '';
 
     foreach($data as $post_data)
@@ -125,13 +104,13 @@ function send_emaildata()
 }
 
 
-function send_email_to_admin() {
-    $to = 'atul.kumar@wisdmlabs.com';
-    $subject = 'Daily Update';
-    $message = 'This is your daily update from WordPress.';
-    $headers = array( 
-        'From: atul.kumar@wisdmlabs.com',
-        'Content-Type: text/html; charset=UTF-8' );
+// function send_email_to_admin() {
+//     $to = 'atul.kumar@wisdmlabs.com';
+//     $subject = 'Daily Update';
+//     $message = 'This is your daily update from WordPress.';
+//     $headers = array( 
+//         'From: atul.kumar@wisdmlabs.com',
+//         'Content-Type: text/html; charset=UTF-8' );
 
-    wp_mail( $to, $subject, $message, $headers );
-}
+//     wp_mail( $to, $subject, $message, $headers );
+// }
