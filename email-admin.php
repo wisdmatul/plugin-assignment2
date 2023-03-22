@@ -8,30 +8,15 @@
 * Text Domain: maildesk
 */
 
-add_action( 'wp', 'send_emaildata' );
-
-//if this file called directly, abort
-if( !defined( 'WPINC' ) )
-{
-    die;
-}
-
-if( !defined( 'WP_PLUGIN_VERSION' ) )
-{
-    define( 'WP_PLUGIN_VERSION', '1.0.0' );
-}
-
-if( !defined( 'WP_PLUGIN_DIR' ) )
-{
-    define( 'WP_PLUGIN_DIR', plugin_dir_url(__FILE__) );
-}
+// add_action( 'wp', 'schedule_emails' );
+register_activation_hook(__FILE__, 'schedule_emails');
 
 //email to send in evry minute or so 
 if(!function_exists('adding_cron_schedule')):
     function adding_cron_schedule($schedules = array())
     {
         $schedules['every_minute'] = array(
-            'iterval' => 120,
+            'interval' => 120,
             'display' => __('Every Minute', 'maildesk'),
         );
         return $schedules;
@@ -39,14 +24,15 @@ if(!function_exists('adding_cron_schedule')):
 add_filter('cron_schedules', 'adding_cron_schedule');
 endif;
 
-function schedule_email()
+function schedule_emails()
 {
-    if( !wp_next_scheduled( 'schedule_email' ) )
+    
+    if( !wp_next_scheduled( 'send_daily_post_summary' ) )
     {
-        wp_schedule_event(time(), 'every_minute', 'schedule_email');
+        wp_schedule_event(time(), 'daily', 'send_daily_post_summary');
     }
 }
-add_action('schedule_email', 'send_emaildata');
+add_action('send_daily_post_summary', 'send_emaildata');
 
 
 function get_emaildata()
@@ -113,14 +99,13 @@ function get_page_speed_score($url) {
 
     $status_code=100;
     
-//     while( $status_code != 200){
-//         sleep(10);
+    while( $status_code != 200){
+        sleep(10);
         $xml_result = "http://www.webpagetest.org/xmlResult/".$test_id."/";
 	    $result = simplexml_load_file($xml_result);
         $status_code = $result->statusCode;
-//         $time = (float) ($result->data->median->firstView->loadTime)/1000;
-//     };
+        $time = (float) ($result->data->median->firstView->loadTime)/1000;
+    };
 
-//     return $time;
-    return $status_code;    
+    return $time;
 }
