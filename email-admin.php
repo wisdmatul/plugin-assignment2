@@ -66,6 +66,7 @@ function get_emaildata()
 
 function send_emaildata()
 {
+    error_log('send_emaildata');
     $to = get_option('admin_email');
     $subject = 'Daily posts';
     $data = get_emaildata();
@@ -99,13 +100,17 @@ function get_page_speed_score($url) {
 
     $status_code=100;
     
-    while( $status_code != 200){
-        sleep(10);
+ //   while( $status_code != 200){
+//        sleep(10);
         $xml_result = "http://www.webpagetest.org/xmlResult/".$test_id."/";
 	    $result = simplexml_load_file($xml_result);
         $status_code = $result->statusCode;
-        $time = (float) ($result->data->median->firstView->loadTime)/1000;
-    };
+        //$time = 'status_code: '. $status_code;
+        {
+           $time = (float) ($result->data->median->firstView->loadTime)/1000;
+        }
+   // };
 
     return $time;
 }
+
